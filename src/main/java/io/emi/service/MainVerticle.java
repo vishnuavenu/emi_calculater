@@ -3,19 +3,13 @@ package io.emi.service;
 import com.google.gson.Gson;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-import org.apache.commons.lang.IncompleteArgumentException;
-import org.apache.commons.lang.SystemUtils;
-import org.apache.commons.lang.math.DoubleRange;
+import io.vertx.ext.web.handler.StaticHandler;
 import org.apache.commons.lang.time.DateUtils;
 
-import java.math.BigDecimal;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -23,12 +17,13 @@ public class MainVerticle extends AbstractVerticle {
   @Override
   public void start() {
     Router router = Router.router(vertx);
+    router.route("/statics/*").handler(StaticHandler.create("webroot").setCachingEnabled(false));
 
     router.get("/").handler(this::index);
     router.get("/calculate").handler(this::calculate);
     vertx.createHttpServer()
         .requestHandler(router::accept)
-        .listen(8082);
+        .listen(8083);
   }
 
 
@@ -87,7 +82,7 @@ public class MainVerticle extends AbstractVerticle {
 
         //        calculating the DF and DCF
         double df = this.getDiscountFactor(rate, numDays);
-        System.out.print(" DF IS "+df+ " for Rate: "+rate+ "  Days: "+numDays+" \n");
+//        System.out.print(" DF IS "+df+ " for Rate: "+rate+ "  Days: "+numDays+" \n");
         double dcf = this.getDiscountedCashFlow(EMI, df);
 
         payments.add( new Payment(nextMonth, numDays, EMI, df, dcf));
@@ -97,26 +92,20 @@ public class MainVerticle extends AbstractVerticle {
   }
 
   private Double getEMI( Double p, Double r, int term ){
-      System.out.print( " [*]  Principle : " + p+" Rate: "+r+" Term: "+term + " \n");
+//      System.out.print( " [*]  Principle : " + p+" Rate: "+r+" Term: "+term + " \n");
       double i =  (r*100) / (12 * 100);
-      System.out.print(" Annualized Rate: "+ i+" \n");
+//      System.out.print(" Annualized Rate: "+ i+" \n");
       return ((p * i) * Math.pow((1 + i),term))  / (Math.pow((1 + i), term) - 1);
   }
 
   private double getDiscountFactor(double rate, long days){
-    double volume = 15.34;
-    double fraction1 = (double) -1/3;
-    double cubeSide = Math.pow(volume,fraction1);
-    System.out.println("*************************"+cubeSide);
-
-
     days = (int)days;
-    System.out.print(" ---------------------------------------- \n");
-    System.out.println(" - Days: "+days+" Rate : "+rate);
+//    System.out.print(" ---------------------------------------- \n");
+//    System.out.println(" - Days: "+days+" Rate : "+rate);
 
     double fraction = (double) -days/360;
-    System.out.print(" Fraction : "+fraction);
-    System.out.print(" ---------------------------------------- \n");
+//    System.out.print(" Fraction : "+fraction);
+//    System.out.print(" ---------------------------------------- \n");
 
     return Math.pow( (1.0 + rate), fraction);
   }
